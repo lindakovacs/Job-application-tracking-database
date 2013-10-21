@@ -1,0 +1,76 @@
+<?php 
+/*
+Author by: Mark E Taylor
+Created: 06/10/2013
+Last updated: 06/10/2013
+
+Revision history: 
+06/10/2013 - Initial creation.
+
+Description: Adds a new report to the MySQL database.
+*/
+
+$_GET = array();
+$_GET['title'] = 'Add application';
+include_once("includes/header-htmlhead.php");
+include_once("includes/header-navigation.php");
+include_once("includes/creatdropdopdown.php");
+
+/* Load some constants. */
+include_once("load_config.php");
+include_once("library/config.php");
+include_once("library/open.php");
+
+$query = "SELECT MAX(reportnumber) AS rn FROM reports";
+$result = $database_object->query($query);
+$row = $result->fetch_assoc();
+$newreportnumber = $row['rn']+1;
+
+$query = "SHOW COLUMNS FROM ".APP_TABLE;
+$result = $database_object->query($query);
+
+print<<<END
+<article>
+<div class="content">
+
+<p>Create a new report:</p>
+
+<form action="save_report.php" method="post" id="met-form">
+
+<fieldset>
+<legend>Report name: ($newreportnumber)</legend>
+	<input type='text' name='reportname' size=40>
+</fieldset>
+
+<table id='summary' class='clearfix'>
+<thead>
+<tr><th>Name</th><th>Select?</th><th>Select format</th><th>Criteria<th>Header name</th><th>Cell format</th></tr>
+</thead>
+<tbody>
+END;
+
+/* Display available fields */
+while($row = $result->fetch_array(MYSQLI_ASSOC)){
+	echo "<tr>
+				<td>$row[Field]</td>
+				<td><input type='checkbox' class='centre' name='selected[]' value='$row[Field]'></td>
+				<td><input type='text' name='selectformat[]' value=''></td>
+				<td><input type='text' name='selectcriteria[]' value=''></td>
+				<td><input type='text' name='headername[]' value=''></td>
+				<td><input type='text' name='cellformat[]' value=''></td>
+				</tr>";
+}
+	
+print<<<END
+</tbody>
+</table>
+
+<input type="submit" title="Add" value="+ Add report" class="clearfix">
+</form>
+
+</div> <!-- End of content. -->
+</article>
+END;
+
+include_once("includes/footer.php");
+?>

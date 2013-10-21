@@ -1,0 +1,29 @@
+/*
+Author by: Mark Taylor
+Created: 06/10/2013
+Last updated: 06/10/2013
+
+Revision history: 
+06/10/2013 - Initial creation.
+
+Description: Adds or removes a cell from a table.
+*/
+
+var addheader = $('[name="addheader"]');
+var removeheader = $('[name="removeheader"]');
+
+addheader.click(function(){
+	var numberofheaders = $("[name='headercells'] td").length;
+	var newheadernumber = numberofheaders + 1;
+	console.log("Add header button clicked on! New number of headers = " + newheadernumber);
+	
+	$("<th>Header " + newheadernumber + "</th>").appendTo('[name="headerheaders"]');
+	$("<td><input type='text' name='header[]' value='New header " + newheadernumber + "'></td>").appendTo('[name="headercells"]');
+});
+
+removeheader.click(function(){
+	console.log("Remove header button clicked on!");
+	
+	$("[name='headerheaders'] th:last-child").remove();	
+	$("[name='headercells'] td:last-child").remove();
+});

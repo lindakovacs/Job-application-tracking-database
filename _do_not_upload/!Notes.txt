@@ -1,0 +1,7 @@
+This folder contains the basic files needed for a web site.
+It includes two index files: one for use with a top menu and the other with PHP code to retrieve data from a MySQL database.
+
+Note: that Javascript code is included in the includes/footer.php code, just above the </body> tag.
+
+Mark E. Taylor
+25th September 2012

@@ -1,0 +1,16 @@
+/*
+Author by: Mark Taylor
+Created: 06/10/2013
+Last updated: 06/10/2013
+
+Revision history: 
+06/10/2013 - Initial creation.
+
+Description: 
+*/
+
+var addheader = $('[name="addheader"]');
+
+addheader.click(function(){
+	console.log("Add header button clicked on!");
+});

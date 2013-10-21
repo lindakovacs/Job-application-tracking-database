@@ -1,0 +1,141 @@
+<?php
+/*
+Author by: Mark E Taylor
+Created: 26/09/2013
+Last updated: 26/09/2013
+
+Revision history: 
+26/09/2013 - Initial creation.
+
+Description: A generalised reporting page. Based on the old reporting page, but made further generic with the select statements and header information stored in the database.
+Usage: user_report_generic.php?reportnumber=nnn
+*/
+
+if(!empty($_GET) && key($_GET)=='reportnumber'){
+	$report_number = $_GET['reportnumber'];
+} else {
+	$report_number = 999;
+}
+
+$_GET['title'] = "Print report number ".$report_number;
+
+include_once("includes/header-htmlhead.php");
+include_once("includes/header-navigation.php");
+
+/* Get the maximum report number. */
+$query = "SELECT MAX(reportnumber) AS 'reportnumber' from ".REPORTS_TABLE;
+$result = $database_object->query($query);
+$line = $result->fetch_assoc();
+$maxreportnumber = $line['reportnumber']+1;
+$result->free_result();
+
+/* !If the report number is valid then display the report. Report numbers are in the range 101 to highest current report number. */
+if($report_number > 100 && $report_number < $maxreportnumber){
+	$_GET['title'] = "Print report number ".$report_number;
+
+	echo "<article>\n<div class='content'>\n";
+	$i=1;
+/* !Get the 'report name' and the 'select' statement for the selected report. */
+	$query = "SELECT reportname, selectstatment, parameter1, parameter2, parameter3 FROM ".REPORTS_TABLE." WHERE reportnumber=$report_number";
+	$result = $database_object->query($query);
+	$line = $result->fetch_assoc();
+	$base_select_query = $line['selectstatment'];
+	$report_name = $line['reportname'];
+
+/*
+!Build the MySQL select statment by adding parameters to the base select statement.	
+The reason for doing this is to allow parameters to be set at run time.
+For example the current year could be calculated at run time. $parameter1 = date('Y');
+Other parameters could be constants, for example the name of the table to be interogated.
+
+If a parameter is not needed then FALSE; needs to be stored in the MySQL database for that parameter.
+*** Note that the parameter ends with a semicolon (;). This terminates the eval() statement.
+
+For example, base SELECT statement, note the %s where the table name would normally be:
+$base_select_query = SELECT id,role,company,reference,date, FORMAT(salary_high,0),FORMAT(salary_low,0) FROM %s WHERE follow_up=TRUE
+
+The sprintf() function then merges $parameter1 into the $base_select_query, in this case a constant. The constant is already defined as the name of a MySQL database table:
+$line[parameter1] = APP_TABLE;
+
+The three parameters retrieved from the database are now evaluated.
+*/
+	eval("\$parameter1 = $line[parameter1]");
+	eval("\$parameter2 = $line[parameter2]");
+	eval("\$parameter3 = $line[parameter3]");
+
+/* The base SELECT statement is combined with the evaluated parameters. */
+	$select_query = sprintf($base_select_query, $parameter1, $parameter2, $parameter3);
+
+/* @Get information about the header for the requested report.  */
+	$header_query = "SELECT header_name FROM ".REPORT_HEADER_TABLE." WHERE report_number=$report_number ORDER by header_order";
+	$header_result = $database_object->query($header_query);
+
+/* Get the information about the cell formatting for the requested report. */
+	$cell_query = "SELECT cell_format FROM ".REPORT_CELLS_TABLE." WHERE report_number=$report_number ORDER by cell_order";
+	$cell_result = $database_object->query($cell_query);
+		
+/* 	Get the actual data from the applications table. */
+	$select_result = $database_object->query($select_query);
+	
+	if(DEBUG){
+		echo "<p>Select statement: <span class='debug'>$select_query</span></p>";
+		echo "<p>Parameters are: <span class='debug'>1 = '$parameter1' 2 = '$parameter2' 3 = '$parameter3'</span></p>";
+	}
+		
+	if($select_result->num_rows){
+		echo "<p>Results for the report '$report_name' ($report_number).</p>\n";
+	
+		echo "<table id='summary'>\n";
+		echo "<thead>\n";
+		echo "<tr>";
+/* Fetch each row of data from the header_row table and place the header name in the header row of the table. */
+		while($row = $header_result->fetch_assoc()){
+			echo "<th>$row[header_name]</th>";
+		}
+		echo "</tr>";
+		echo "</thead>\n";
+		echo "<tbody>\n";
+		
+/* Fetch each row of data from the application table and place the data in cells. */
+		while($line = $select_result->fetch_assoc()){
+/* First column is always the index column, incremental number. */
+			echo "<tr><td class='centre'>$i</td>";
+/* Loop through the columns of data. */			
+			foreach($line as $cell_data){
+/* Get the format of the next cell. */
+				$get_formatted_cell = $cell_result->fetch_assoc();
+/* Add the data to the formatted cell and display it. */
+				echo sprintf($get_formatted_cell['cell_format'], $cell_data);
+			}
+			
+/* 	Go back to the first item in the cell formatting result, i.e. the fist format. */
+			$cell_result->data_seek(0);
+			echo "</tr>\n";
+			$i++;
+		}
+		echo "</tbody>\n</table>\n";
+		} else {
+			echo "<p>No data for the report '$report_name' ($report_number) at the moment.</p>\n";
+		}
+	$result->free_result();
+	} else {
+	$_GET['title'] = "Invalid report number selected";
+	include_once("includes/header-htmlhead.php");
+	include_once("includes/header-navigation.php");
+
+	echo "<article>\n<div class='content'>\n";
+	echo "<p>Incorrect report number provided. Reports available are:</p>";
+	$query = "SELECT reportnumber,reportname FROM ".REPORTS_TABLE;
+	$result = $database_object->query($query);
+	while($line = $result->fetch_assoc()){
+		echo "<p>$line[reportnumber] - $line[reportname]</p>";
+	}
+	$result->free_result();
+}
+
+include_once("library/close.php");
+
+echo "</div><!-- End of content. -->\n</article>\n";
+
+include_once("includes/footer.php");
+?>

@@ -1,0 +1,78 @@
+<?php
+/*
+Author by: Mark E Taylor
+Created: 26/09/2013
+Last updated: 26/09/2013
+
+Revision history: 
+26/09/2013 - Initial creation.
+
+Description: A generalised reporting page. Based on the old reporting page, but made further generic with the select statements and header information stored in the database.
+Usage: print_report_generic.php?reportnumber=nnn
+*/
+
+
+if(!empty($_GET) && key($_GET)=='reportnumber'){
+	$report_number = $_GET['reportnumber'];
+} else {
+	$report_number = 999;
+}
+
+/* !If the report number is valid then display the report. Report numbers are in the range 0 to the size of the array $select_where. */
+if($report_number < 999 && $report_number > -1 ){
+	$_GET['title'] = "Print '".$report_name[$report_number]." report";
+	include_once("includes/header-htmlhead.php");
+	include_once("includes/header-navigation.php");
+
+	echo "<article>\n<div class='content'>\n";
+	$i=1;
+/* Get the information about the selected report. */
+	$query = "SELECT * FROM ".REPORTS_TABLE." WHERE reportnumber=$report_number";
+	$result = $database_object->query($query);
+	$line = $result->fetch_assoc();
+	$header_row = $line['headerrow'];
+	$body_row = $line['bodyrow'];
+	$query = $line['selectstatment'];
+	$report_name = $line['reportname'];
+	
+	if(DEBUG){
+		echo "Query: $query";
+		}
+	
+	$result = $database_object->query($query);
+	if($result->num_rows){
+		echo "<p>Summary of job applications which have a status of '$report_name'.</p>\n";
+	
+		echo "<table id='summary'>\n";
+		echo $header_row."\n";
+		echo "<tbody>\n";
+		
+		while($line = $result->fetch_assoc()){
+			echo "<tr>";
+			echo $body_row;
+/* 			echo "<td class='centre'>$i</td><td class='centre'><a href='edit_job.php?id=$line[id]'>$line[id]</a></td><td>$line[role]</td><td>$line[company]</td><td>&pound;".number_format($line['salary_high'],0)."</td><td>$line[reference]</td><td>$line[date]</td>"; */
+			echo "</tr>\n";
+			$i++;
+		}
+		echo "</tbody>\n</table>\n";
+		} else {
+			echo "<p>No applications have a status of '$report_name' at the moment.</p>\n";
+		}
+	$result->free_result();
+	
+	} else {
+	
+		$_GET['title'] = "Invalid report number selected";
+		include_once("includes/header-htmlhead.php");
+		include_once("includes/header-navigation.php");
+
+		echo "<article>\n<div class='content'>\n";
+		echo "<p>Incorrect report number provided. Reports available are:</p>";	
+}
+
+include_once("library/close.php");
+
+echo "</div><!-- End of content. -->\n</article>\n";
+
+include_once("includes/footer.php");
+?>

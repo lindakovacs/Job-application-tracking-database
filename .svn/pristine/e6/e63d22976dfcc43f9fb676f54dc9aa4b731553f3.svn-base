@@ -1,0 +1,26 @@
+<?php
+/*
+Author by: Mark E Taylor
+Created: 05/10/2013
+Last updated: 05/10/2013
+
+Revision history: 
+05/10/2013 - Initial creation.
+
+Description: Saves a new report and returns to the summary page (index.php).
+*/
+include_once("library/config.php");
+include_once("library/open.php");
+include_once("load_config.php");
+
+echo "<p>Columns selected:</p>";
+print_r($_POST['selected']);
+
+echo "<p>Columns format:</p>";
+print_r($_POST['selectformat']);
+
+
+
+exit(99);
+/* header('location: index.php'); */
+?>

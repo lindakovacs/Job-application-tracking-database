@@ -1,0 +1,45 @@
+<?php 
+/*
+Author by: Mark E Taylor
+Created: 06/10/2013
+Last updated: 06/10/2013
+
+Revision history: 
+06/10/2013 - Initial creation.
+
+Description: Adds a new report to the MySQL database.
+*/
+
+$_GET = array();
+$_GET['title'] = 'Add application';
+include_once("includes/header-htmlhead.php");
+include_once("includes/header-navigation.php");
+include_once("includes/creatdropdopdown.php");
+
+/* Load some constants. */
+include_once("load_config.php");
+include_once("library/config.php");
+include_once("library/open.php");
+
+print<<<END
+<article>
+<div class="content">
+
+<p>Create a new report:</p>
+
+<form action="save_report.php" method="post" id="met-form">
+
+<fieldset title="Fields">
+	<legend>Notes</legend>
+	<textarea name="notes" cols="40" rows="5"></textarea>
+</fieldset>
+
+<input type="submit" title="Add" value="+ Add application" class="clearfix">
+</form>
+
+</div> <!-- End of content. -->
+</article>
+END;
+
+include_once("includes/footer.php");
+?>

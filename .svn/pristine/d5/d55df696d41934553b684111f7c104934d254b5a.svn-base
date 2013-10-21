@@ -1,0 +1,46 @@
+<?php
+/*
+Author by: Mark E Taylor
+Created: 05/10/2013
+Last updated: 05/10/2013
+
+Revision history: 
+05/10/2013 - Initial creation.
+
+Description: Saves a new report and returns to the summary page (index.php).
+
+**** UNFINISHED ****
+*/
+
+include_once("library/config.php");
+include_once("library/open.php");
+include_once("load_config.php");
+
+/* Calculate the highest display order, i.e the place in the menu where the new report will go. */
+$query = "SELECT max(displayorder) AS do FROM ".REPORTS_TABLE;
+$result = $database_object->query($query);
+$row = $result->fetch_assoc();
+$nextdisplayorder = $row['do']+1;
+
+/* *** Show what will be saved. *** */
+/* The reports table. */
+echo "<p>Reports table.</p>";
+
+$reports_query = "INSERT INTO reports (reportnumber, reportname, select_statement, select_parameter1, select_parameter2, select_parameter3, displayorder) VALUE ('$_POST[reportnumber]', '$_POST[reportname]', '$_POST[select]', '$_POST[parameter1]', '$_POST[parameter2]', '$_POST[parameter3]', $nextdisplayorder)";
+echo "<p>Reports table INSERT statement: $reports_query</p>";
+
+/* Insert into the reports table. */
+$result = $database_object->query($reports_query);
+$result->free_result();
+
+/* Insert into the report_header table. */
+$result = "";
+$result->free_result();
+
+/* Insert into the report_cells table. */
+$result = "";
+$result->free_result();
+
+exit(99);
+/* header('location: index.php'); */
+?>
