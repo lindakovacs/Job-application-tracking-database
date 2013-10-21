@@ -1,5 +1,5 @@
-.svn
+.svn/*
 auth*.php
-/m
-/_do_not_upload
+/m/*
+/_do_not_upload/*
 /library/config.php
